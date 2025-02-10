@@ -7,12 +7,12 @@ const cartSchema = new mongoose.Schema({
     id: {type: mongoose.Schema.Types.ObjectId},
     user: userSchema,
     games: [{
-        gameSchema
+        type: gameSchema
     }]
     //adicionar token
 
 }, {versionKey: false})
 
-const cart = mongoose.model("cart", cartSchema);
+const Cart = mongoose.model("Cart", cartSchema);
 
-export default cart;
+export { Cart, cartSchema };
