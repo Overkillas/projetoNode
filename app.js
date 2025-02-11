@@ -1,6 +1,7 @@
 import express from "express";
 import databaseConnect from "./src/database/connection.js";
 import routes from './routes/index.js'
+//require("dotenv-safe").config();
 
 const connection = await databaseConnect();
 
@@ -11,6 +12,7 @@ connection.on("error", (error) =>{
 connection.once("open", () =>{
     console.log("conexão feita com sucesso.")
 });
+
 
 const app = express();
 
