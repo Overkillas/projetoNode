@@ -1,17 +1,37 @@
 import { User } from "../models/User.js"
 import apiErrors from "../classes/apiErrors.js"
 import jwt from "jsonwebtoken"
+import bcrypt from "bcrypt"
 
 const userController = {
     
     create: async (req, res) => {
-        try{
-            const user = await User.create(req.body)
-            res.status(201).json({ msg: "usuario criado com sucesso!"});
+        const user = req.body
+        const password = user.password
+        // if (User.some(user => user.email === email)) {
+        //     return res.status(400).json({ message: 'User already exists' });
+        // }
+
+        try {
+            const hashedPassword = await bcrypt.hash(password, 10);
+
+            user.password = hashedPassword
+            console.log(user);
+            const newUser = await User.create(user)
+            res.status(201).json(newUser);
         } catch (error) {
-            res.status(error.statusCode || 500).json({ message: `${error.message}` });
+            res.status(500).json({ message: `${error.message}` });
         }
     },
+   
+    // create: async (req, res) => {
+    //     try{
+    //         const user = await User.create(req.body)
+    //         res.status(201).json({ msg: "usuario criado com sucesso!"});
+    //     } catch (error) {
+    //         res.status(error.statusCode || 500).json({ message: `${error.message}` });
+    //     }
+    // },
 
     list: async (req, res) => {
         let userList = await User.find({});
@@ -76,7 +96,8 @@ const userController = {
             const password = req.body.password
             const foundUser = await User.find({email: email})
             if(!foundUser) throw new apiErrors("email ou senha inválidos (1)", 401);
-            if(password !== foundUser[0]?.password) throw new apiErrors("email ou senha inválidos (2)", 401);
+            //if(password !== foundUser[0]?.password) throw new apiErrors("email ou senha inválidos (2)", 401);
+            if(!(await bcrypt.compare(password, foundUser[0]?.password))) throw new apiErrors("email ou senha inválidos (2)", 401);
             const id = foundUser.id
             const token = jwt.sign({ id }, process.env.SECRET, {
               expiresIn: 3000 // expires in 5min
